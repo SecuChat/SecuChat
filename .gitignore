@@ -5,8 +5,9 @@
 *.dylib
 *.out
 *.test
-server
-server.exe
+/server
+/server.exe
+dist/
 
 # Runtime data
 *.db

@@ -90,4 +90,6 @@ jobs:
           cache: true
 
       - name: Build server binary
-        run: go build -v ./cmd/server
+        run: |
+          mkdir -p dist
+          go build -v -trimpath -ldflags="-s -w" -o dist/secuchat ./cmd/server

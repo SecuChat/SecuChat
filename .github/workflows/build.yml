@@ -45,9 +45,11 @@ jobs:
             ext=".exe"
           fi
 
+          artifact_path="dist/secuchat-${{ matrix.goos }}-${{ matrix.goarch }}${ext}"
+
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 \
             go build -trimpath -ldflags="-s -w" \
-            -o "dist/secuchat-${{ matrix.goos }}-${{ matrix.goarch }}${ext}" \
+            -o "$artifact_path" \
             ./cmd/server
 
       - name: Upload build artifact
