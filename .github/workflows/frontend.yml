@@ -1,0 +1,45 @@
+name: Frontend CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate asset references in index.html
+        run: node .github/scripts/validate-web-assets.mjs
+
+      - name: Check JavaScript syntax
+        run: |
+          for file in web/js/*.js; do
+            echo "Checking $file"
+            node --check "$file"
+          done
+
+      - name: Run static frontend smoke test
+        run: |
+          python3 -m http.server 8088 --directory web >/tmp/secuchat-web.log 2>&1 &
+          server_pid=$!
+          trap "kill $server_pid" EXIT
+          sleep 2
+          curl --fail --silent --show-error http://127.0.0.1:8088/index.html >/dev/null
+          curl --fail --silent --show-error http://127.0.0.1:8088/js/app.js >/dev/null
+          curl --fail --silent --show-error http://127.0.0.1:8088/css/style.css >/dev/null
