@@ -1,0 +1,28 @@
+# Build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+*.out
+*.test
+server
+server.exe
+
+# Runtime data
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.log
+
+# Environment / local config
+.env
+.env.*
+!.env.example
+.claude/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

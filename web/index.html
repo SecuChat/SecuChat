@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <title>SecuChat - End-to-End Encrypted Chat</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <div id="auth-screen" class="screen">
+            <div class="auth-container">
+                <h1>SecuChat</h1>
+                <p class="tagline">End-to-end encrypted messaging</p>
+                
+                <div id="auth-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" placeholder="Choose a username" autocomplete="off" maxlength="32">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="Enter a password" autocomplete="new-password" minlength="8">
+                    </div>
+                    <div class="button-group">
+                        <button id="create-btn" class="btn primary">Create Account</button>
+                        <button id="login-btn" class="btn secondary">Login</button>
+                    </div>
+                </div>
+                
+                <div class="security-note">
+                    <p>Messages are encrypted on your device. The server cannot read your conversations.</p>
+                    <p class="small">Your encryption keys are protected by your password and stored locally in this browser.</p>
+                    <p class="small warning">Important: You must use the same browser to log in. If you switch browsers or clear your data, you will need to create a new account.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="chat-screen" class="screen hidden">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <span id="current-user"></span>
+                    <div class="sidebar-header-actions">
+                        <button id="settings-btn" class="btn-icon" title="Account Settings">&#x2699;</button>
+                        <button id="logout-btn" class="btn-icon" title="Logout">&#x2716;</button>
+                    </div>
+                </div>
+                
+                <div class="room-actions">
+                    <button id="create-room-btn" class="btn primary small">+ New Room</button>
+                    <button id="join-by-code-btn" class="btn secondary small">Join by Code</button>
+                    <button id="refresh-rooms-btn" class="btn secondary small">Refresh</button>
+                </div>
+                
+                <div id="room-list" class="room-list"></div>
+            </div>
+            
+            <div class="chat-area">
+                <div id="no-room-selected" class="placeholder">
+                    <p>Select a room or create a new one to start chatting</p>
+                </div>
+                
+                <div id="room-view" class="hidden">
+                    <div class="chat-header">
+                        <h2 id="room-name"></h2>
+                        <div class="room-info">
+                            <span id="member-count"></span>
+                            <button id="leave-room-btn" class="btn secondary small">Leave</button>
+                        </div>
+                    </div>
+                    
+                    <div id="invite-code-section" class="invite-code-section hidden">
+                        <span class="invite-code-label">Invite Code:</span>
+                        <code id="invite-code-display"></code>
+                        <button id="copy-invite-code-btn" class="btn secondary small">Copy</button>
+                        <button id="regenerate-code-btn" class="btn secondary small">Regenerate</button>
+                    </div>
+                    
+                    <div class="members-bar">
+                        <div id="members-list"></div>
+                    </div>
+                    
+                    <div id="messages" class="messages"></div>
+                    
+                    <div class="message-input">
+                        <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off">
+                        <button id="send-btn" class="btn primary">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="create-room-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Create New Room</h3>
+                <div class="form-group">
+                    <label for="room-name-input">Room Name</label>
+                    <input type="text" id="room-name-input" placeholder="Enter room name" maxlength="64">
+                </div>
+                <div class="form-group checkbox-group">
+                    <label>
+                        <input type="checkbox" id="room-private-checkbox">
+                        <span>Private Room (requires invite code to join)</span>
+                    </label>
+                </div>
+                <div class="button-group">
+                    <button id="confirm-create-room" class="btn primary">Create</button>
+                    <button id="cancel-create-room" class="btn secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="join-by-code-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Join Room by Invite Code</h3>
+                <div class="form-group">
+                    <label for="invite-code-input">Invite Code</label>
+                    <input type="text" id="invite-code-input" placeholder="Enter invite code (e.g., XXXX-XXXX-XXXX-XXXX)">
+                </div>
+                <div class="button-group">
+                    <button id="confirm-join-code" class="btn primary">Join</button>
+                    <button id="cancel-join-code" class="btn secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="account-settings-modal" class="modal hidden">
+            <div class="modal-content settings-modal-content">
+                <h3>Account Settings</h3>
+
+                <div class="settings-section">
+                    <h4>Key Rotation</h4>
+                    <p class="modal-desc">Generate new encryption and signing keys. Your existing messages will remain readable, but new messages will use the new keys.</p>
+                    <button id="rotate-keys-btn" class="btn primary small">Rotate Keys</button>
+                </div>
+
+                <div class="settings-section danger-zone">
+                    <h4>Delete Account</h4>
+                    <p class="modal-desc">Permanently delete your account and all rooms you created. This action cannot be undone.</p>
+                    <button id="delete-account-btn" class="btn danger small">Delete Account</button>
+                </div>
+
+                <div class="button-group" style="margin-top: 16px;">
+                    <button id="close-settings-btn" class="btn secondary">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="input-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3 id="input-modal-title">Input</h3>
+                <p id="input-modal-desc" class="modal-desc"></p>
+                <div class="form-group">
+                    <label id="input-modal-label" for="input-modal-field">Value</label>
+                    <input type="text" id="input-modal-field" placeholder="" autocomplete="off">
+                </div>
+                <div class="button-group">
+                    <button id="confirm-input-modal" class="btn primary">Confirm</button>
+                    <button id="cancel-input-modal" class="btn secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="password-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3 id="password-modal-title">Enter Password</h3>
+                <p id="password-modal-desc" class="modal-desc"></p>
+                <div class="form-group">
+                    <label for="password-input">Password</label>
+                    <input type="password" id="password-input" placeholder="Enter your password" autocomplete="off">
+                </div>
+                <div id="confirm-password-group" class="form-group hidden">
+                    <label for="confirm-password-input">Confirm Password</label>
+                    <input type="password" id="confirm-password-input" placeholder="Confirm your password" autocomplete="off">
+                </div>
+                <div id="password-error" class="error-text hidden"></div>
+                <div class="button-group">
+                    <button id="confirm-password-btn" class="btn primary">Confirm</button>
+                    <button id="cancel-password-btn" class="btn secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/crypto.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ws.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
